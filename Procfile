@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi
+web: gunicorn spotify_cleaner_web.wsgi:application
