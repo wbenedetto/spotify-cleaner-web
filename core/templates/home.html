@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html>
   {{ playlists|json_script:"playlist-data" }}
-
 <head>
   <title>Your Playlists</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .main-bottom::-webkit-scrollbar {
-      display: none;
-    }
-
-    .main-bottom {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;     /* Firefox */
-    }
+    .main-bottom::-webkit-scrollbar { display: none; }
+    .main-bottom { -ms-overflow-style: none; scrollbar-width: none; }
 
     body {
       margin: 0;
@@ -74,7 +67,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      overflow: hidden; /* prevent body scroll */
+      overflow: hidden;
     }
 
     .main-top {
@@ -145,79 +138,74 @@
   </div>
 </div>
 
-
 <script>
   const playlists = JSON.parse(document.getElementById('playlist-data').textContent);
 
+  function showLoading() {
+    document.getElementById("loading").style.display = "block";
+  }
 
   function selectPlaylist(index) {
-  document.querySelectorAll('.playlist-entry').forEach(el => el.classList.remove('selected'));
-  document.getElementById(`playlist-${index}`).classList.add('selected');
+    document.querySelectorAll('.playlist-entry').forEach(el => el.classList.remove('selected'));
+    document.getElementById(`playlist-${index}`).classList.add('selected');
 
-  const playlist = playlists[index];
-  const top = document.getElementById("mainTopContent");
-  const bottom = document.getElementById("mainBottomContent");
+    const playlist = playlists[index];
+    const top = document.getElementById("mainTopContent");
+    const bottom = document.getElementById("mainBottomContent");
 
-  // FIRST: Build the song list
-  let songList = `
-  <div style="display: grid; grid-template-columns: 30px 2fr 2fr; font-weight: bold; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #333;">
-    <div>#</div>
-    <div>Title</div>
-    <div>Album</div>
-  </div>
-`;
-
-playlist.songs.forEach((song, i) => {
-  songList += `
-    <div style="display: grid; grid-template-columns: 30px 2fr 2fr; align-items: center; padding: 6px 0; border-bottom: 1px solid #1e1e1e;">
-      <div style="color:#b3b3b3;">${i + 1}</div>
-      <div>
-        <div>${song.name}</div>
-        <div style="color:#b3b3b3; font-size: 12px;">${song.artist}</div>
+    let songList = `
+      <div style="display: grid; grid-template-columns: 30px 2fr 2fr; font-weight: bold; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #333;">
+        <div>#</div>
+        <div>Title</div>
+        <div>Album</div>
       </div>
-      <div style="color:#b3b3b3; font-zise: 15px;">${song.album || ''}</div>
-    </div>
-  `;
-});
+    `;
 
+    playlist.songs.forEach((song, i) => {
+      songList += `
+        <div style="display: grid; grid-template-columns: 30px 2fr 2fr; align-items: center; padding: 6px 0; border-bottom: 1px solid #1e1e1e;">
+          <div style="color:#b3b3b3;">${i + 1}</div>
+          <div>
+            <div>${song.name}</div>
+            <div style="color:#b3b3b3; font-size: 12px;">${song.artist}</div>
+          </div>
+          <div style="color:#b3b3b3; font-size: 15px;">${song.album || ''}</div>
+        </div>
+      `;
+    });
 
-  // THEN: Inject the top panel HTML
-  top.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 20px;">
-      <img src="${playlist.image_url || ''}" alt="Cover" style="width: 200px; height: 200px; border-radius: 10px;">
-      <div>
-        <h1 style="font-size: 60px; padding-bottom: 2px">${playlist.name}</h1>
-        <p style="font-size: 18px">${playlist.tracks} Tracks</p>
-        <form method="post" action="/organize/">
-          <input type="hidden" name="playlist_uri" value="${playlist.uri}">
-          <button type="submit"><i class="fa-solid fa-arrows-rotate"></i> Organize Playlist</button>
-        </form>
+    top.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <img src="${playlist.image_url || ''}" alt="Cover" style="width: 200px; height: 200px; border-radius: 10px;">
+        <div>
+          <h1 style="font-size: 60px; padding-bottom: 2px">${playlist.name}</h1>
+          <p style="font-size: 18px">${playlist.tracks} Tracks</p>
+          <form method="post" action="/organize/" onsubmit="showLoading()">
+            <input type="hidden" name="playlist_uri" value="${playlist.uri}">
+            <button type="submit"><i class="fa-solid fa-arrows-rotate"></i> Organize Playlist</button>
+          </form>
+          <div id="loading" style="display:none; margin-top: 10px;">
+            <p>Organizing your playlist... This may take a moment.</p>
+          </div>
+        </div>
       </div>
-    </div>
-    <hr style="height:2px;border-width:0;color:#343434;background-color:#343434">
-  `;
+      <hr style="height:2px;border-width:0;color:#343434;background-color:#343434">
+    `;
 
-  // Add songs to bottom section
-  bottom.innerHTML = songList;
-}
-
-
+    bottom.innerHTML = songList;
+  }
 
   document.querySelectorAll('.playlist-entry').forEach(el => {
-  el.addEventListener('click', () => {
-    const index = el.getAttribute('data-index');
-    selectPlaylist(index);
+    el.addEventListener('click', () => {
+      const index = el.getAttribute('data-index');
+      selectPlaylist(index);
+    });
   });
-});
 
-if (playlists.length > 0) {
-  selectPlaylist(0);
-}
-
-
+  if (playlists.length > 0) {
+    selectPlaylist(0);
+  }
 </script>
-
-
 
 </body>
 </html>
