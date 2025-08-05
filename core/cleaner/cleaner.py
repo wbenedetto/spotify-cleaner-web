@@ -26,9 +26,21 @@ def removeSong(sp, playlistURI, name, artist=None):
 
 def getPlaylistSongs(sp, playlistURI):
     playlistSongs = []
-    songs = sp.playlist_tracks(playlistURI, fields='items.track.name', limit=None, offset=0)
-    for item in songs["items"]:
-        playlistSongs.append(item["track"]["name"])
+    offset = 0
+    limit = 100
+
+    while True:
+        results = sp.playlist_tracks(playlistURI, fields='items.track.name,total', limit=limit, offset=offset)
+        items = results['items']
+        if not items:
+            break
+
+        for item in items:
+            if item.get("track") and item["track"].get("name"):
+                playlistSongs.append(item["track"]["name"])
+
+        offset += limit
+
     return playlistSongs
 
 def getPlaylistLength(sp, playlistURI):
