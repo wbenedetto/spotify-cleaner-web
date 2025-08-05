@@ -22,10 +22,11 @@ def playlist_info(request):
 
 
 def login(request):
+    request.session.flush()  # 👈 Clears session (including token)
     sp_oauth = get_spotify_oauth()
-    print("Redirect URI being used:", sp_oauth.redirect_uri)
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
+
 
 def callback(request):
     sp_oauth = get_spotify_oauth()
