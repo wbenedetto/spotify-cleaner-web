@@ -1,19 +1,10 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from django.http import HttpResponseRedirect
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from .cleaner.cleaner import runCleaner, getPlaylistLength, getPlaylistSongs
 from django.http import JsonResponse
-from .cleaner.spotify_auth import sp_oauth
-from django.shortcuts import redirect
-from core.cleaner.spotify_auth import get_spotify_oauth
-from django.shortcuts import redirect, render
 from spotipy import Spotify
-from core.cleaner.spotify_auth import get_spotify_oauth, getPlaylistSongs, getPlaylistLength
-from django.views.decorators.csrf import csrf_exempt
-
+import spotipy
+from .cleaner.cleaner import runCleaner, getPlaylistLength, getPlaylistSongs
+from .cleaner.spotify_auth import get_spotify_oauth
 
 
 def playlist_info(request):
@@ -53,11 +44,13 @@ def get_valid_token(request):
     if not token_info:
         return None
 
+    sp_oauth = get_spotify_oauth()
     if sp_oauth.is_token_expired(token_info):
         token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
         request.session['token_info'] = token_info
 
     return token_info
+
 
 
 @csrf_exempt
