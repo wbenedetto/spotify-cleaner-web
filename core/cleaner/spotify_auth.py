@@ -11,5 +11,5 @@ def get_spotify_oauth():
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
         scope = "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private",
-        cache_path=None
+       #cache_path=None
     )
