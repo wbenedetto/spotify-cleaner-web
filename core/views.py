@@ -4,7 +4,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from .cleaner.cleaner import runCleaner, getPlaylistLength
+from .cleaner.cleaner import runCleaner, getPlaylistLength, getPlaylistSongs
 from django.http import JsonResponse
 from .cleaner.spotify_auth import sp_oauth
 
@@ -63,13 +63,7 @@ def home(request):
     playlists = []
 
     for p in playlists_raw:
-        track_items = sp.playlist_tracks(p['id'])['items']
-        songs = [{
-            'name': t['track']['name'],
-            'artist': t['track']['artists'][0]['name'],
-            'album': t['track']['album']['name']
-        } for t in track_items if t.get('track')]
-
+        songs = getPlaylistSongs(sp, p['id'])
 
         playlists.append({
             'name': p['name'],
@@ -78,6 +72,7 @@ def home(request):
             'image_url': p['images'][0]['url'] if p['images'] else None,
             'songs': songs
         })
+
         
     
 

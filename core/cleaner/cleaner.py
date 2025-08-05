@@ -24,13 +24,13 @@ def addSong(sp, playlistURI, name, artist=None):
 def removeSong(sp, playlistURI, name, artist=None):
     sp.playlist_remove_all_occurrences_of_items(playlistURI, [findURI(name, artist)], snapshot_id=None)
 
-def getPlaylistSongs(sp, playlistURI):
+def getPlaylistSongs(sp, playlist_id):
     playlistSongs = []
     offset = 0
     limit = 100
 
     while True:
-        results = sp.playlist_tracks(playlistURI, limit=limit, offset=offset)
+        results = sp.playlist_tracks(playlist_id, limit=limit, offset=offset)
         items = results.get('items', [])
         if not items:
             break
@@ -39,14 +39,18 @@ def getPlaylistSongs(sp, playlistURI):
             track = item.get("track")
             if track:
                 playlistSongs.append({
-                    'name': track.get("name", "Unknown Title"),
-                    'artist': track['artists'][0]['name'] if track.get('artists') else 'Unknown Artist',
-                    'album': track['album']['name'] if track.get('album') else 'Unknown Album'
+                    'name': track['name'],
+                    'artist': track['artists'][0]['name'],
+                    'album': track['album']['name']
                 })
 
         offset += limit
 
+    print(f"Fetched {len(playlistSongs)} songs from playlist: {playlist_id}")
     return playlistSongs
+
+
+
 
 def getPlaylistLength(sp, playlistURI):
     data = sp.playlist(playlistURI, fields='tracks.total')
@@ -137,3 +141,4 @@ def runCleaner(sp, playlistURI):
         return f"Error during cleaner run: {e}"
 
 #git test
+
