@@ -30,14 +30,19 @@ def getPlaylistSongs(sp, playlistURI):
     limit = 100
 
     while True:
-        results = sp.playlist_tracks(playlistURI, fields='items.track.name,total', limit=limit, offset=offset)
-        items = results['items']
+        results = sp.playlist_tracks(playlistURI, limit=limit, offset=offset)
+        items = results.get('items', [])
         if not items:
             break
 
         for item in items:
-            if item.get("track") and item["track"].get("name"):
-                playlistSongs.append(item["track"]["name"])
+            track = item.get("track")
+            if track:
+                playlistSongs.append({
+                    'name': track.get("name", "Unknown Title"),
+                    'artist': track['artists'][0]['name'] if track.get('artists') else 'Unknown Artist',
+                    'album': track['album']['name'] if track.get('album') else 'Unknown Album'
+                })
 
         offset += limit
 
