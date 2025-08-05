@@ -31,9 +31,12 @@ def callback(request):
     sp_oauth = get_spotify_oauth()
     code = request.GET.get("code")
     token_info = sp_oauth.get_access_token(code)
-    
+
+    # Save in session
     request.session["token_info"] = token_info
+
     return redirect("home")
+
 
 
 def get_spotify_client(access_token):
@@ -60,17 +63,17 @@ def home(request):
     if not token_info:
         return redirect("login")
 
+    
+    print("TOKEN INFO:", token_info)
+
+
     sp = Spotify(auth=token_info["access_token"])
 
     playlists_raw = sp.current_user_playlists(limit=50)['items']
     playlists = []
 
     for p in playlists_raw:
-        try:
-            songs = getPlaylistSongs(sp, p['id'])
-        except spotipy.exceptions.SpotifyException as e:
-            print(f"Skipping playlist {p['name']} due to error: {e}")
-            continue
+        songs = getPlaylistSongs(sp, p['id'])
 
         playlists.append({
             'name': p['name'],
@@ -81,6 +84,7 @@ def home(request):
         })
 
     return render(request, "home.html", {"playlists": playlists})
+
 
 
     
