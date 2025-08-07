@@ -5,7 +5,7 @@ from spotipy import Spotify
 import spotipy
 from .cleaner.cleaner import runCleaner, getPlaylistLength, getPlaylistSongs
 from .cleaner.spotify_auth import get_spotify_oauth
-
+from spotipy.exceptions import SpotifyException
 
 def playlist_info(request):
     uri = request.GET.get('uri')
@@ -29,14 +29,15 @@ def login(request):
 
 
 def callback(request):
-    sp_oauth = get_spotify_oauth()
-    code = request.GET.get("code")
-    token_info = sp_oauth.get_access_token(code)
+    code = request.GET.get('code')
+    oauth = get_spotify_oauth()
+    token_info = oauth.get_access_token(code, as_dict=True)
 
-    # Save in session
-    request.session["token_info"] = token_info
+    # Save token in session
+    request.session['token_info'] = token_info
 
-    return redirect("home")
+    return redirect('home')  # Or wherever your playlist view is
+
 
 
 
@@ -57,34 +58,40 @@ def get_valid_token(request):
     return token_info
 
 
+def logout_view(request):
+    request.session.flush()  # wipes all session data
+    return redirect('login')
 
 @csrf_exempt
 def home(request):
-    token_info = get_valid_token(request)
+    # Check for token in session (stateless login flow)
+    token_info = request.session.get('token_info')
+
     if not token_info:
         return redirect("login")
 
-    
-    print("TOKEN INFO:", token_info)
+    try:
+        sp = Spotify(auth=token_info["access_token"])
+        playlists_raw = sp.current_user_playlists(limit=50)['items']
+        playlists = []
 
+        for p in playlists_raw:
+            songs = getPlaylistSongs(sp, p['id'])
 
-    sp = Spotify(auth=token_info["access_token"])
+            playlists.append({
+                'name': p['name'],
+                'uri': p['uri'],
+                'tracks': getPlaylistLength(sp, p['uri']),
+                'image_url': p['images'][0]['url'] if p['images'] else None,
+                'songs': songs
+            })
 
-    playlists_raw = sp.current_user_playlists(limit=50)['items']
-    playlists = []
+        return render(request, "home.html", {"playlists": playlists})
 
-    for p in playlists_raw:
-        songs = getPlaylistSongs(sp, p['id'])
-
-        playlists.append({
-            'name': p['name'],
-            'uri': p['uri'],
-            'tracks': getPlaylistLength(sp, p['uri']),
-            'image_url': p['images'][0]['url'] if p['images'] else None,
-            'songs': songs
-        })
-
-    return render(request, "home.html", {"playlists": playlists})
+    except SpotifyException:
+        # Token is likely expired or bad, reset session
+        request.session.flush()
+        return redirect("login")
 
 
 
@@ -106,4 +113,3 @@ def organize(request):
         return redirect("home")
 
 
-#testing github
