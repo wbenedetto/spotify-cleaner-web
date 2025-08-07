@@ -20,9 +20,8 @@ def playlist_info(request):
     return JsonResponse(data)
 
 
-
 def login(request):
-    request.session.flush()  # 👈 Clears session (including token)
+    request.session.flush()
     sp_oauth = get_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
@@ -33,16 +32,14 @@ def callback(request):
     oauth = get_spotify_oauth()
     token_info = oauth.get_access_token(code, as_dict=True)
 
-    # Save token in session
     request.session['token_info'] = token_info
 
-    return redirect('home')  # Or wherever your playlist view is
-
-
+    return redirect('home')
 
 
 def get_spotify_client(access_token):
     return spotipy.Spotify(auth=access_token)
+
 
 def get_valid_token(request):
     token_info = request.session.get("token_info")
@@ -59,12 +56,12 @@ def get_valid_token(request):
 
 
 def logout_view(request):
-    request.session.flush()  # wipes all session data
+    request.session.flush()
     return redirect('login')
+
 
 @csrf_exempt
 def home(request):
-    # Check for token in session (stateless login flow)
     token_info = request.session.get('token_info')
 
     if not token_info:
@@ -89,13 +86,8 @@ def home(request):
         return render(request, "home.html", {"playlists": playlists})
 
     except SpotifyException:
-        # Token is likely expired or bad, reset session
         request.session.flush()
         return redirect("login")
-
-
-
-    
 
 
 @csrf_exempt
@@ -111,5 +103,3 @@ def organize(request):
         message = runCleaner(sp, playlist_uri)
         print(message)
         return redirect("home")
-
-

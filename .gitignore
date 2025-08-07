@@ -1,21 +1,10 @@
-# Python bytecode and cache
 __pycache__/
 *.py[cod]
-
-# SQLite database
 db.sqlite3
-
-# Spotipy / OAuth token cache
 .spotifycache
 .cache/
 .cache
-
-# Environment variables
 .env
-
-# VSCode settings (optional but common)
 .vscode/
-
-# System files
 .DS_Store
 Thumbs.db

@@ -10,6 +10,7 @@ def fetchPlaylists(sp):
         userPlaylists.setdefault(playlist['name'], playlist['uri'])
     return userPlaylists
 
+
 def findURI(sp, title, artist=None,):
     if artist:
         songSearch = sp.search(q=f'track:{title} artist:{artist}', type='track', limit=1)
@@ -18,11 +19,14 @@ def findURI(sp, title, artist=None,):
     URI = songSearch['tracks']['items'][0]['uri']
     return URI
 
+
 def addSong(sp, playlistURI, name, artist=None):
     sp.playlist_add_items(playlistURI, [findURI(name, artist)], position=None)
 
+
 def removeSong(sp, playlistURI, name, artist=None):
     sp.playlist_remove_all_occurrences_of_items(playlistURI, [findURI(name, artist)], snapshot_id=None)
+
 
 def getPlaylistSongs(sp, playlist_id):
     playlistSongs = []
@@ -50,12 +54,9 @@ def getPlaylistSongs(sp, playlist_id):
     return playlistSongs
 
 
-
-
 def getPlaylistLength(sp, playlistURI):
     data = sp.playlist(playlistURI, fields='tracks.total')
     return data['tracks']['total']
-
 
 
 def getPlaylistArtists(sp, playlistURI):
@@ -65,6 +66,7 @@ def getPlaylistArtists(sp, playlistURI):
         playlistArtists.append(item['track']['artists'][0]['name'])
     return playlistArtists
 
+
 def uploadGPT(uriList, prompt):
     formatted = '\n'.join(uriList)
     response = client.responses.create(
@@ -73,12 +75,14 @@ def uploadGPT(uriList, prompt):
     )
     return response.output_text
 
+
 def randomizePlaylist(sp, playlistURI):
     songs = getPlaylistSongs(playlistURI)
     indexList = list(range(len(songs)))
     random.shuffle(indexList)
     for i in range(len(songs)):
         sp.playlist_reorder_items(playlistURI, range_start=i, insert_before=indexList[i], range_length=1)
+
 
 def createOrderKey(songs):
     removedLines = songs.split('\n')
@@ -92,11 +96,13 @@ def createOrderKey(songs):
     orderListDict = dict(orderList)
     return orderListDict
 
+
 def reorderPlaylist(sp, playlistURI, uriList):
     for uri in uriList:
         print(f"Re-adding: {uri}")
         sp.playlist_remove_all_occurrences_of_items(playlistURI, [uri])
         sp.playlist_add_items(playlistURI, [uri])
+
 
 def createURIList(sp, playlistURI):
     data = sp.playlist_items(playlistURI)
@@ -120,6 +126,7 @@ prompts = [
     'Can you place these in an order that makes sense to listen to them in as if they were all in the same album?'
 ]
 
+
 def runCleaner(sp, playlistURI):
     try:
         print("Getting original playlist URIs...")
@@ -139,6 +146,3 @@ def runCleaner(sp, playlistURI):
 
     except Exception as e:
         return f"Error during cleaner run: {e}"
-
-#git test
-
