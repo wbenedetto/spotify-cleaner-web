@@ -70,7 +70,7 @@ def getPlaylistArtists(sp, playlistURI):
 def uploadGPT(uriList, prompt):
     formatted = '\n'.join(uriList)
     response = client.responses.create(
-        model="gpt-5",
+        model="gpt-4.1",
         input=f"Here is a list of my playlist songs (URIs):\n\n{formatted}\n\n{prompt}. Return only a reordered list of URIs, nothing else."
     )
     return response.output_text
