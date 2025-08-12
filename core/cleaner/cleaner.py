@@ -123,7 +123,7 @@ def createURIList(sp, playlistURI):
 prompts = [
     'Can you sort these by release date?',
     'Can you make some song recommendations based on my playlist. Return song names and artists as pairs.',
-    'Can you place these in an order that makes sense to listen to them in as if they were all in the same album? Place duplicates (ex: 2004 vs 1996 remaster) together. You may fetch metadata from Spotify for these URIs'
+    'Can you place these in an order that makes sense to listen to them in as if they were all in the same album? Place duplicates (ex: 2004 vs 1996 remaster) together. You have permission to query Spotify for these URIs metadata'
 ]
 
 
